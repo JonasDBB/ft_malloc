@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
+#include "ft_clib.h"
+#include "ft_list.h"
 
 #include <sys/utsname.h>
 void print_os_name() {
