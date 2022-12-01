@@ -10,8 +10,6 @@ add_subdirectory(src)
 
 include_directories(
 		${CMAKE_SOURCE_DIR}/inc
-		${CMAKE_SOURCE_DIR}/ft_clib/ft_clib EXCLUDE_FROM_ALL
-		${CMAKE_SOURCE_DIR}/ft_clib/ft_list EXCLUDE_FROM_ALL
 )
 
 target_compile_options(ft_malloc PUBLIC
@@ -27,4 +25,4 @@ target_link_options(ft_malloc PUBLIC
 		)
 
 add_subdirectory(ft_clib EXCLUDE_FROM_ALL)
-target_link_libraries(ft_malloc ft_clib)
+target_link_libraries(ft_malloc ft_list ft_clib)
