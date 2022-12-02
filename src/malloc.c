@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "ft_clib.h"
-//#include "ft_list.h"
 #include "ft_malloc.h"
 #include <pthread.h>
 #include <errno.h>
@@ -21,66 +20,64 @@ heaps_t g_heaps = {.tiny = NULL,
                    .large =NULL};
 
 
-tiny_mem_region_t* create_region() {
-    tiny_mem_region_t* new_region = (tiny_mem_region_t*)mmap(NULL, TINY_HEAP_SIZE, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+mem_region_t* create_region(size_t size) {
+    LOG("creating new region with size %lu", size);
+    mem_region_t* new_region = (mem_region_t*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
     if (new_region == MAP_FAILED) {
         write(2, "MAP ERROR\n", 10);
     }
-    ft_bzero(new_region, TINY_HEAP_SIZE);
-    new_region->allocations = new_region;
-    new_region->allocations += sizeof(tiny_mem_region_t);
-    LOG("%p %p", new_region, new_region->allocations);
-    LOG("diff %lu", (void*)new_region->allocations - (void*)new_region);
-    LOG("array size is %lu", (TINY_HEAP_SIZE - sizeof(tiny_mem_region_t)) / (TINY_MEM_SIZE + 1));
+    ft_bzero(new_region, size);
+    new_region->allocations = (void*)new_region + sizeof(mem_region_t);
     return new_region;
 }
 
-void* find_free_mem() {
-    tiny_mem_region_t* curr_region = g_heaps.tiny;
+void* find_free_mem(mem_region_t* list, size_t heap_size, size_t mem_size) {
+    mem_region_t* curr_region = list;
     while (curr_region) {
-        // loop array
         char* mem_block = curr_region->allocations;
         int i = 0;
-        while ((void*)mem_block < (void*)curr_region + TINY_HEAP_SIZE) {
+        while ((void*)mem_block < (void*)curr_region + heap_size) {
             if (*mem_block == FREE) {
                 LOG("free block at %d", i);
                 *mem_block = ALLOC;
                 return (mem_block + 1);
             }
             ++i;
-            mem_block += TINY_MEM_SIZE + 1;
+            mem_block += mem_size + 1;
         }
         curr_region = curr_region->next;
     }
     return NULL;
 }
 
-void append_tiny_heap(tiny_mem_region_t* new_heap) {
-    tiny_mem_region_t* tmp = g_heaps.tiny;
+void append_heap(mem_region_t* new_heap, mem_region_t* list) {
+    mem_region_t* tmp = list;
     while (tmp->next) {
         tmp = tmp->next;
     }
     tmp->next = new_heap;
 }
 
-void* malloc_tiny() {
-    if (g_heaps.tiny == NULL) {
-        g_heaps.tiny = create_region();
+void* malloc_tiny_small(mem_region_t** list, size_t heap_size, size_t mem_size) {
+    if (*list == NULL) {
+        *list = create_region(heap_size);
     }
-    void* ret = find_free_mem();
+    void* ret = find_free_mem(*list, heap_size, mem_size);
     while (ret == NULL) {
-        append_tiny_heap(create_region());
-        ret = find_free_mem();
-
+        append_heap(create_region(heap_size), *list);
+        ret = find_free_mem(*list, heap_size, mem_size);
     }
     return ret;
 }
 
 void* ft_malloc(size_t size) {
     if (size <= TINY_MEM_SIZE) {
-        return malloc_tiny();
+        return malloc_tiny_small(&g_heaps.tiny, TINY_HEAP_SIZE, TINY_MEM_SIZE);
+    } else if (size <= SMALL_MEM_SIZE) {
+        return malloc_tiny_small(&g_heaps.small, SMALL_HEAP_SIZE, SMALL_MEM_SIZE);
     } else {
-        LOG("size not yet handled");
+        // for large allocations size should be multiple of getpagesize()
+        size = (size + (getpagesize() - 1)) & ~(getpagesize() - 1);
     }
     errno = ENOMEM;
     return NULL;
@@ -88,11 +85,9 @@ void* ft_malloc(size_t size) {
 
 int main() {
     print_os_name();
-    LOG("page size %lu", TINY_HEAP_SIZE);
-    LOG("size %lu", sizeof(tiny_mem_region_t));
-    for (int i = 0; i < 500; ++i) {
-        LOG("%p", ft_malloc(16));
-        LOG("%p", ft_malloc(25));
-    }
+//    for (int i = 0; i < 510; ++i) {
+//        LOG("%p", ft_malloc(16));
+//        LOG("%p", ft_malloc(67));
+//    }
     return(0);
 }

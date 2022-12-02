@@ -13,15 +13,15 @@
 #define TINY_HEAP_SIZE (4 * getpagesize())
 #define SMALL_HEAP_SIZE (16 * getpagesize())
 
-typedef struct tiny_mem_region_s {
+typedef struct mem_region_s {
     void* allocations;
-    struct tiny_mem_region_s* next;
-} tiny_mem_region_t;
+    struct mem_region_s* next;
+} mem_region_t;
 
 typedef struct heaps_s {
-    tiny_mem_region_t* tiny;
-    tiny_mem_region_t* small;
-    tiny_mem_region_t* large;
+    mem_region_t* tiny;
+    mem_region_t* small;
+    mem_region_t* large;
 } heaps_t;
 
 enum free_state {
