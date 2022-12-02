@@ -32,6 +32,9 @@ mem_region_t* create_region(size_t size) {
 }
 
 void* find_free_mem(mem_region_t* list, size_t heap_size, size_t mem_size) {
+    if (list == NULL) {
+        return NULL;
+    }
     mem_region_t* curr_region = list;
     while (curr_region) {
         char* mem_block = curr_region->allocations;
@@ -50,8 +53,13 @@ void* find_free_mem(mem_region_t* list, size_t heap_size, size_t mem_size) {
     return NULL;
 }
 
-void append_heap(mem_region_t* new_heap, mem_region_t* list) {
-    mem_region_t* tmp = list;
+void append_heap(mem_region_t* new_heap, mem_region_t** list) {
+//    LOG("%s", __func__);
+    if (*list == NULL) {
+        *list = new_heap;
+        return;
+    }
+    mem_region_t* tmp = *list;
     while (tmp->next) {
         tmp = tmp->next;
     }
@@ -59,15 +67,19 @@ void append_heap(mem_region_t* new_heap, mem_region_t* list) {
 }
 
 void* malloc_tiny_small(mem_region_t** list, size_t heap_size, size_t mem_size) {
-    if (*list == NULL) {
-        *list = create_region(heap_size);
-    }
+//    LOG("%s", __func__);
     void* ret = find_free_mem(*list, heap_size, mem_size);
     while (ret == NULL) {
-        append_heap(create_region(heap_size), *list);
+        append_heap(create_region(heap_size), list);
         ret = find_free_mem(*list, heap_size, mem_size);
     }
     return ret;
+}
+
+void* malloc_large(size_t size) {
+    mem_region_t* new_region = create_region(size);
+    append_heap(new_region, &g_heaps.large);
+    return new_region->allocations;
 }
 
 void* ft_malloc(size_t size) {
@@ -78,9 +90,8 @@ void* ft_malloc(size_t size) {
     } else {
         // for large allocations size should be multiple of getpagesize()
         size = (size + (getpagesize() - 1)) & ~(getpagesize() - 1);
+        return malloc_large(size);
     }
-    errno = ENOMEM;
-    return NULL;
 }
 
 int main() {
@@ -89,5 +100,6 @@ int main() {
 //        LOG("%p", ft_malloc(16));
 //        LOG("%p", ft_malloc(67));
 //    }
+
     return(0);
 }
