@@ -24,9 +24,16 @@ typedef struct heaps_s {
     mem_region_t* large;
 } heaps_t;
 
-enum free_state {
+typedef enum free_state_e {
     FREE = 0,
     ALLOC = 1
-};
+} free_state;
+
+typedef enum mem_size_e {
+    TINY,
+    SMALL,
+    LARGE,
+    ERROR
+} mem_size;
 
 #endif //FT_MALLOC_FT_MALLOC_H

@@ -77,9 +77,79 @@ void* malloc_tiny_small(mem_region_t** list, size_t heap_size, size_t mem_size) 
 }
 
 void* malloc_large(size_t size) {
+    // for large allocations size should be multiple of getpagesize()
+    size = (size + (getpagesize() - 1)) & ~(getpagesize() - 1);
     mem_region_t* new_region = create_region(size);
     append_heap(new_region, &g_heaps.large);
     return new_region->allocations;
+}
+
+mem_size find_allocated_size(void* ptr) {
+    if (ptr == NULL) {
+        return ERROR;
+    }
+    mem_region_t* current = g_heaps.tiny;
+    while (current != NULL) {
+        if (ptr > current->allocations && ptr < current->allocations + TINY_HEAP_SIZE) {
+            return TINY;
+        }
+        current = current->next;
+    }
+    current = g_heaps.small;
+    while (current != NULL) {
+        if (ptr > current->allocations && ptr < current->allocations + SMALL_HEAP_SIZE) {
+            return SMALL;
+        }
+        current = current->next;
+    }
+    current = g_heaps.large;
+    while (current != NULL) {
+        if (ptr == current->allocations) {
+            return LARGE;
+        }
+        current = current->next;
+    }
+    return ERROR;
+}
+
+void* ft_realloc(void* ptr, size_t size) {
+    mem_size mem_category = find_allocated_size(ptr);
+    if (mem_category == ERROR) {
+        return NULL;
+    }
+    if ((mem_category == TINY && size <= TINY_MEM_SIZE) ||
+        (mem_category == SMALL && size > TINY_MEM_SIZE && size <= SMALL_MEM_SIZE)) {
+        return ptr;
+    }
+
+    if (size <= TINY_MEM_SIZE) {
+        void* new_tiny = malloc_tiny_small(&g_heaps.tiny, TINY_HEAP_SIZE, TINY_MEM_SIZE);
+        ft_memcpy(new_tiny, ptr, TINY_MEM_SIZE);
+        if (mem_category == LARGE) {
+            // TODO: free large
+        } else {
+            *(char*)(ptr - 1) = 0;
+        }
+        return new_tiny;
+    }
+
+    if (size <= SMALL_MEM_SIZE) {
+        void* new_small = malloc_tiny_small(&g_heaps.small, SMALL_HEAP_SIZE, SMALL_MEM_SIZE);
+        size_t len_to_copy = mem_category == TINY ? TINY_MEM_SIZE : SMALL_MEM_SIZE;
+        ft_memcpy(new_small, ptr, len_to_copy);
+        if (mem_category == LARGE) {
+            // TODO: free large
+        } else {
+            *(char*)(ptr - 1) = 0;
+        }
+        return new_small;
+    }
+
+    void* new_large = malloc_large(size);
+    size_t len_to_copy = mem_category == TINY ? TINY_MEM_SIZE : SMALL_MEM_SIZE;
+    ft_memcpy(new_large, ptr, len_to_copy);
+    *(char*)(ptr - 1) = 0;
+    return new_large;
 }
 
 void* ft_malloc(size_t size) {
@@ -88,8 +158,6 @@ void* ft_malloc(size_t size) {
     } else if (size <= SMALL_MEM_SIZE) {
         return malloc_tiny_small(&g_heaps.small, SMALL_HEAP_SIZE, SMALL_MEM_SIZE);
     } else {
-        // for large allocations size should be multiple of getpagesize()
-        size = (size + (getpagesize() - 1)) & ~(getpagesize() - 1);
         return malloc_large(size);
     }
 }
