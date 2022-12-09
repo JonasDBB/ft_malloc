@@ -12,7 +12,6 @@ heaps_t g_heaps = {.tiny = NULL,
         .large =NULL};
 
 static mem_region_t* create_region(size_t size) {
-    LOG("creating new region with size %lu", size);
     mem_region_t* new_region = (mem_region_t*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
     if (new_region == MAP_FAILED) {
         write(2, "MAP ERROR\n", 10);
@@ -29,14 +28,11 @@ static void* find_free_mem(mem_region_t* list, size_t heap_size, size_t mem_size
     mem_region_t* curr_region = list;
     while (curr_region) {
         char* mem_block = curr_region->allocations;
-        int i = 0;
         while ((void*)mem_block < (void*)curr_region + heap_size) {
             if (*mem_block == FREE) {
-                LOG("free block at %d", i);
                 *mem_block = ALLOC;
                 return (mem_block + 1);
             }
-            ++i;
             mem_block += mem_size + 1;
         }
         curr_region = curr_region->next;
@@ -45,7 +41,6 @@ static void* find_free_mem(mem_region_t* list, size_t heap_size, size_t mem_size
 }
 
 static void append_heap(mem_region_t* new_heap, mem_region_t** list) {
-//    LOG("%s", __func__);
     if (*list == NULL) {
         *list = new_heap;
         return;
@@ -58,7 +53,6 @@ static void append_heap(mem_region_t* new_heap, mem_region_t** list) {
 }
 
 void* malloc_tiny_small(mem_region_t** list, size_t heap_size, size_t mem_size) {
-//    LOG("%s", __func__);
     void* ret = find_free_mem(*list, heap_size, mem_size);
     while (ret == NULL) {
         append_heap(create_region(heap_size), list);
@@ -75,7 +69,6 @@ void* malloc_large(size_t size) {
     mem_region_t* new_region = create_region(size);
     append_heap(new_region, &g_heaps.large);
     // save nr of pages used. this only works up to unsigned int max * pages
-
     *(unsigned int*)new_region->allocations = size / getpagesize();
     return new_region->allocations + sizeof(unsigned int);
 }
