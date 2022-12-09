@@ -25,7 +25,7 @@ int main() {
 //    }
 //    LOG("short max %lu", USHRT_MAX);
 //    LOG("max memsize %lu", USHRT_MAX * getpagesize());
-    void *p = ft_malloc(5000);
+    void* p = ft_malloc(5000);
     LOG("%p", p);
     p = ft_realloc(p, 7000);
     LOG("%p", p);
@@ -36,5 +36,5 @@ int main() {
     p = ft_realloc(p, 19000);
     LOG("%p", p);
 
-    return(0);
+    return (0);
 }

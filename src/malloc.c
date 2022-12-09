@@ -8,8 +8,8 @@
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 heaps_t g_heaps = {.tiny = NULL,
-                   .small = NULL,
-                   .large =NULL};
+        .small = NULL,
+        .large =NULL};
 
 static mem_region_t* create_region(size_t size) {
     LOG("creating new region with size %lu", size);

@@ -63,6 +63,7 @@ void* ft_realloc(void* ptr, size_t size) {
         if (mem_category == LARGE) {
             // TODO: free large
         } else {
+            // should actually use free, to unmap page if necessary
             *(char*)(ptr - 1) = 0;
         }
         return new_tiny;
@@ -75,6 +76,7 @@ void* ft_realloc(void* ptr, size_t size) {
         if (mem_category == LARGE) {
             // TODO: free large
         } else {
+            // should actually use free, to unmap page if necessary
             *(char*)(ptr - 1) = 0;
         }
         return new_small;
@@ -86,6 +88,7 @@ void* ft_realloc(void* ptr, size_t size) {
     if (mem_category == LARGE) {
         // TODO: free large
     } else {
+        // should actually use free, to unmap page if necessary
         *(char*)(ptr - 1) = 0;
     }
     return new_large;

@@ -4,6 +4,7 @@
 
 #ifndef FT_MALLOC_FT_MALLOC_PRIVATE_H
 #define FT_MALLOC_FT_MALLOC_PRIVATE_H
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <unistd.h>
