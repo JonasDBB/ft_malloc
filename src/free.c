@@ -72,7 +72,7 @@ void ft_free(void* ptr) {
         return;
     }
     if (owning_size == TINY || owning_size == SMALL) {
-        *(char*)(ptr -1) = 0;
+        *(char*)(ptr - 1) = 0;
         size_t heap_size = owning_size == TINY ? TINY_HEAP_SIZE : SMALL_HEAP_SIZE;
         size_t mem_size = owning_size == TINY ? TINY_MEM_SIZE : SMALL_MEM_SIZE;
         if (!is_region_empty(owning_heap, heap_size, mem_size)) {

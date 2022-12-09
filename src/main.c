@@ -25,8 +25,20 @@ int main() {
 //    }
 //    LOG("short max %lu", USHRT_MAX);
 //    LOG("max memsize %lu", USHRT_MAX * getpagesize());
-//    void* p = ft_malloc(5000);
-//    LOG("%p", p);
+    void* p = ft_malloc(5000);
+    void* q = ft_malloc(69);
+    void* r = ft_malloc(14);
+    void* s = ft_malloc(12);
+    LOG("%p", p);
+    LOG("%p", q);
+    LOG("%p", r);
+    LOG("%p", s);
+    show_alloc_mem();
+    LOG("");
+    ft_free(r);
+    show_alloc_mem();
+//    size_t x = (size_t)p;
+//    LOG("%lu", sizeof(p));
 //    p = ft_realloc(p, 7000);
 //    LOG("%p", p);
 //    p = ft_realloc(p, 2000);
@@ -35,15 +47,15 @@ int main() {
 //    LOG("%p", p);
 //    p = ft_realloc(p, 19000);
 //    LOG("%p", p);
-    char* arr1[512];
-    char* arr2[512];
-    for (int i = 0; i < 512; ++i) {
-        arr1[i] = ft_malloc(17);
-        arr2[i] = ft_malloc(69);
-    }
-    for (int i = 0; i < 512; ++i) {
-        ft_free(arr1[i]);
-        ft_free(arr2[i]);
-    }
+//    char* arr1[512];
+//    char* arr2[512];
+//    for (int i = 0; i < 512; ++i) {
+//        arr1[i] = ft_malloc(17);
+//        arr2[i] = ft_malloc(69);
+//    }
+//    for (int i = 0; i < 512; ++i) {
+//        ft_free(arr1[i]);
+//        ft_free(arr2[i]);
+//    }
     return (0);
 }
