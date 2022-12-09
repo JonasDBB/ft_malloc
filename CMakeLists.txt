@@ -4,7 +4,7 @@ project(ft_malloc C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-add_executable(ft_malloc)
+add_executable(ft_malloc src/main.c)
 
 add_subdirectory(src)
 
