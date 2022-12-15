@@ -7,9 +7,6 @@ extern pthread_mutex_t g_lock;
 extern heaps_t g_heaps;
 
 static mem_size find_allocated_size(void* ptr) {
-    if (ptr == NULL) {
-        return ERROR;
-    }
     mem_region_t* current = g_heaps.tiny;
     while (current != NULL) {
         if (ptr > current->allocations && ptr < current->allocations + TINY_HEAP_SIZE) {

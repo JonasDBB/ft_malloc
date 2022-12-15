@@ -4,6 +4,7 @@
 #include "ft_malloc_private.h"
 #include <pthread.h>
 #include <sys/mman.h>
+#include <sys/resource.h>
 
 pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -64,6 +65,15 @@ void* malloc_tiny_small(mem_region_t** list, size_t heap_size, size_t mem_size) 
 void* malloc_large(size_t size) {
     // extra size needed to keep track of allocation
     size += sizeof(mem_region_t) + sizeof(unsigned int);
+
+    struct rlimit rlp;
+    if (getrlimit(RLIMIT_DATA, &rlp) != 0) {
+        return NULL;
+    }
+    if (rlp.rlim_max > size) {
+        return NULL;
+    }
+
     // for large allocations size should be multiple of getpagesize()
     size = (size + (getpagesize() - 1)) & ~(getpagesize() - 1);
     mem_region_t* new_region = create_region(size);
