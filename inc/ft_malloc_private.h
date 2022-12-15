@@ -9,10 +9,10 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-#define TINY_MEM_SIZE 32UL
-#define SMALL_MEM_SIZE 128UL
-#define TINY_HEAP_SIZE (4 * getpagesize())
-#define SMALL_HEAP_SIZE (16 * getpagesize())
+#define TINY_MEM_SIZE 128UL
+#define SMALL_MEM_SIZE 1024UL
+#define TINY_HEAP_SIZE (8 * getpagesize())
+#define SMALL_HEAP_SIZE (64 * getpagesize())
 
 typedef struct mem_region_s {
     void* allocations;
