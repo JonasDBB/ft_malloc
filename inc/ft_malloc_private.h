@@ -39,5 +39,7 @@ typedef enum mem_size_e {
 
 void* malloc_tiny_small(mem_region_t** list, size_t heap_size, size_t mem_size);
 void* malloc_large(size_t size);
+void* locked_malloc(size_t size);
+void locked_free(void* ptr);
 
 #endif //FT_MALLOC_FT_MALLOC_PRIVATE_H

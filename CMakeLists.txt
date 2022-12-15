@@ -56,7 +56,7 @@ add_subdirectory(ft_clib EXCLUDE_FROM_ALL)
 add_custom_command(POST_BUILD
 		TARGET libmalloc
 		COMMENT "creating symlink..."
-		COMMAND ln -s ${OUTNAME}.so ${LINKNAME})
+		COMMAND ln -sf ${OUTNAME}.so ${LINKNAME})
 
 add_executable(ft_malloc src/main.c)
 target_link_libraries(ft_malloc libmalloc)

@@ -1,7 +1,9 @@
 #include "ft_malloc.h"
 #include "ft_malloc_private.h"
 #include "ft_clib.h"
+#include <pthread.h>
 
+extern pthread_mutex_t g_lock;
 extern heaps_t g_heaps;
 
 static mem_size find_allocated_size(void* ptr) {
@@ -32,13 +34,13 @@ static mem_size find_allocated_size(void* ptr) {
     return ERROR;
 }
 
-void* ft_realloc(void* ptr, size_t size) {
+static void* locked_realloc(void* ptr, size_t size) {
     if (ptr == NULL) {
-        return ft_malloc(size);
+        return locked_malloc(size);
     }
     if (size == 0) {
-        ft_free(ptr);
-        return ft_malloc(TINY_MEM_SIZE);
+        locked_free(ptr);
+        return locked_malloc(TINY_MEM_SIZE);
     }
     mem_size mem_category = find_allocated_size(ptr);
     if (mem_category == ERROR) {
@@ -60,7 +62,7 @@ void* ft_realloc(void* ptr, size_t size) {
     if (size <= TINY_MEM_SIZE) {
         void* new_tiny = malloc_tiny_small(&g_heaps.tiny, TINY_HEAP_SIZE, TINY_MEM_SIZE);
         ft_memcpy(new_tiny, ptr, TINY_MEM_SIZE);
-        ft_free(ptr);
+        locked_free(ptr);
         return new_tiny;
     }
 
@@ -68,7 +70,7 @@ void* ft_realloc(void* ptr, size_t size) {
         void* new_small = malloc_tiny_small(&g_heaps.small, SMALL_HEAP_SIZE, SMALL_MEM_SIZE);
         size_t len_to_copy = mem_category == TINY ? TINY_MEM_SIZE : SMALL_MEM_SIZE;
         ft_memcpy(new_small, ptr, len_to_copy);
-        ft_free(ptr);
+        locked_free(ptr);
         return new_small;
     }
 
@@ -76,6 +78,13 @@ void* ft_realloc(void* ptr, size_t size) {
     size_t len_to_copy = mem_category == TINY ? TINY_MEM_SIZE : SMALL_MEM_SIZE;
     ft_memcpy(new_large, ptr, len_to_copy);
     // TODO: from larger large to smaller large should only free ending pages
-    ft_free(ptr);
+    locked_free(ptr);
     return new_large;
+}
+
+void* ft_realloc(void* ptr, size_t size) {
+    pthread_mutex_lock(&g_lock);
+    void* ret = locked_realloc(ptr, size);
+    pthread_mutex_unlock(&g_lock);
+    return ret;
 }

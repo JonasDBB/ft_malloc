@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <sys/mman.h>
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 
 heaps_t g_heaps = {.tiny = NULL,
         .small = NULL,
@@ -73,7 +73,7 @@ void* malloc_large(size_t size) {
     return new_region->allocations + sizeof(unsigned int);
 }
 
-void* ft_malloc(size_t size) {
+void* locked_malloc(size_t size) {
     if (size <= TINY_MEM_SIZE) {
         return malloc_tiny_small(&g_heaps.tiny, TINY_HEAP_SIZE, TINY_MEM_SIZE);
     } else if (size <= SMALL_MEM_SIZE) {
@@ -81,4 +81,11 @@ void* ft_malloc(size_t size) {
     } else {
         return malloc_large(size);
     }
+}
+
+void* ft_malloc(size_t size) {
+    pthread_mutex_lock(&g_lock);
+    void* ret = locked_malloc(size);
+    pthread_mutex_unlock(&g_lock);
+    return ret;
 }

@@ -3,7 +3,9 @@
 #include "ft_clib.h"
 #include <sys/mman.h>
 #include <errno.h>
+#include <pthread.h>
 
+extern pthread_mutex_t g_lock;
 extern heaps_t g_heaps;
 
 static mem_region_t* find_owning_heap(void* ptr, mem_size* mem_size) {
@@ -61,7 +63,7 @@ void remove_from_list(mem_region_t** list, mem_region_t* elem) {
     current->next = elem->next;
 }
 
-void ft_free(void* ptr) {
+void locked_free(void* ptr) {
     if (ptr == NULL) {
         return;
     }
@@ -89,4 +91,10 @@ void ft_free(void* ptr) {
     if (munmap(owning_heap, page_n * getpagesize()) != 0) {
         write(2, "munmap failed!\n", 15);
     }
+}
+
+void ft_free(void* ptr) {
+    pthread_mutex_lock(&g_lock);
+    locked_free(ptr);
+    pthread_mutex_unlock(&g_lock);
 }
