@@ -79,7 +79,7 @@ static void* locked_realloc(void* ptr, size_t size) {
     return new_large;
 }
 
-void* ft_realloc(void* ptr, size_t size) {
+void* realloc(void* ptr, size_t size) {
     pthread_mutex_lock(&g_lock);
     void* ret = locked_realloc(ptr, size);
     pthread_mutex_unlock(&g_lock);

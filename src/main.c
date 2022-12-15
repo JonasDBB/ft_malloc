@@ -25,18 +25,16 @@ int main() {
 //    }
 //    LOG("short max %lu", USHRT_MAX);
 //    LOG("max memsize %lu", USHRT_MAX * getpagesize());
-    void* p = ft_malloc(5000);
-    void* q = ft_malloc(69);
-    void* r = ft_malloc(14);
-    void* s = ft_malloc(12);
-    LOG("%p", p);
-    LOG("%p", q);
-    LOG("%p", r);
-    LOG("%p", s);
+    void* p = malloc(5000);
+    void* q = malloc(500);
+    void* r = malloc(14);
+    void* s = malloc(12);
     show_alloc_mem();
-    LOG("");
-    ft_free(r);
+    free(r);
     show_alloc_mem();
+    free(p);
+    free(q);
+    free(s);
 //    size_t x = (size_t)p;
 //    LOG("%lu", sizeof(p));
 //    p = ft_realloc(p, 7000);

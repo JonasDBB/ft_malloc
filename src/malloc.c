@@ -70,7 +70,7 @@ void* malloc_large(size_t size) {
     if (getrlimit(RLIMIT_DATA, &rlp) != 0) {
         return NULL;
     }
-    if (rlp.rlim_max > size) {
+    if (rlp.rlim_max < size) {
         return NULL;
     }
 
@@ -93,7 +93,7 @@ void* locked_malloc(size_t size) {
     }
 }
 
-void* ft_malloc(size_t size) {
+void* malloc(size_t size) {
     pthread_mutex_lock(&g_lock);
     void* ret = locked_malloc(size);
     pthread_mutex_unlock(&g_lock);
