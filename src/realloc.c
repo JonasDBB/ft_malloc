@@ -2,6 +2,7 @@
 #include "ft_malloc_private.h"
 #include "ft_clib.h"
 #include <pthread.h>
+#include <sys/mman.h>
 
 extern pthread_mutex_t g_lock;
 extern heaps_t g_heaps;
@@ -71,10 +72,24 @@ static void* locked_realloc(void* ptr, size_t size) {
         return new_small;
     }
 
+    size_t old_size = *(unsigned int*)(ptr - sizeof(unsigned int)) * getpagesize();
+    if (old_size > size + sizeof(mem_region_t) + sizeof(unsigned int)) {
+        size = (size + (getpagesize() - 1)) & ~(getpagesize() - 1);
+        void* owning_ptr = ptr - sizeof(unsigned int) - sizeof(mem_region_t);
+        // owning ptr is page aligned
+        // size is new size alligned to multiple of pagesize
+        // old_size - size is size reduction (in multiple of pagesize)
+        if (munmap(owning_ptr + size, old_size - size) != 0) {
+            write(2, "munmap failed!\n", 15);
+        }
+        // change new nr of pages
+        *(unsigned int*)(ptr - sizeof(unsigned int)) = size / getpagesize();
+        return ptr;
+    }
+
     void* new_large = malloc_large(size);
     size_t len_to_copy = mem_category == TINY ? TINY_MEM_SIZE : SMALL_MEM_SIZE;
     ft_memcpy(new_large, ptr, len_to_copy);
-    // TODO: from larger large to smaller large should only free ending pages
     locked_free(ptr);
     return new_large;
 }
