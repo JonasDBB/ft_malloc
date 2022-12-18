@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 project(ft_malloc C)
 
-set(CMAKE_SHARED_MODULE_SUFFIX .so)
+set(CMAKE_SHARED_MODULE_SUFFIX .dylib)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
+set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 add_library(libmalloc SHARED)
 
@@ -17,7 +17,7 @@ target_include_directories(libmalloc PUBLIC
 set(HOSTTYPE $ENV{HOSTTYPE})
 
 if ("${HOSTTYPE}" STREQUAL "")
-	message("HOSTTYPE env var is not set, creating name...")
+	message("-- HOSTTYPE env var is not set, creating name...")
 	execute_process(COMMAND uname -m
 			OUTPUT_VARIABLE TYPE1
 			OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -26,10 +26,10 @@ if ("${HOSTTYPE}" STREQUAL "")
 			OUTPUT_STRIP_TRAILING_WHITESPACE)
 	set(HOSTTYPE "${TYPE1}_${TYPE2}")
 else ()
-	message("HOSTTYPE env var is \"${HOSTTYPE}\"")
+	message("-- HOSTTYPE env var is \"${HOSTTYPE}\"")
 endif ()
 
-message("HOSTTYPE var is \"${HOSTTYPE}\"")
+message("-- HOSTTYPE var is \"${HOSTTYPE}\"")
 
 set(OUTNAME "libft_malloc_${HOSTTYPE}")
 set(LINKNAME libft_malloc.so)
@@ -55,7 +55,7 @@ add_subdirectory(ft_clib EXCLUDE_FROM_ALL)
 
 add_custom_command(POST_BUILD
 		TARGET libmalloc
-		COMMENT "creating symlink..."
+		COMMENT "-- creating symlink..."
 		COMMAND ln -sf ${OUTNAME}.so ${LINKNAME})
 
 add_executable(ft_malloc src/main.c)

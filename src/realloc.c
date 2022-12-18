@@ -32,6 +32,25 @@ static mem_size find_allocated_size(void* ptr) {
     return ERROR;
 }
 
+static bool need_realloc(void* ptr, size_t size, mem_size mem_category) {
+    size_t new_size = size + sizeof(mem_region_t) + sizeof(unsigned int);
+    // current size is large, new size is also large
+    if (mem_category == LARGE && new_size >= (size_t)getpagesize()) {
+        unsigned int pages_used = *(unsigned int*)(ptr - sizeof(unsigned int));
+        new_size = (new_size + (getpagesize() - 1)) & ~(getpagesize() - 1);
+        if (new_size / getpagesize() == pages_used) {
+            // same nr of pages needed
+            return false;
+        }
+    }
+    // tiny to tiny or small to small realloc
+    if ((mem_category == TINY && size <= TINY_MEM_SIZE) ||
+        (mem_category == SMALL && size > TINY_MEM_SIZE && size <= SMALL_MEM_SIZE)) {
+        return false;
+    }
+    return true;
+}
+
 static void* locked_realloc(void* ptr, size_t size) {
     if (ptr == NULL) {
         return locked_malloc(size);
@@ -40,20 +59,13 @@ static void* locked_realloc(void* ptr, size_t size) {
         locked_free(ptr);
         return locked_malloc(TINY_MEM_SIZE);
     }
+
     mem_size mem_category = find_allocated_size(ptr);
     if (mem_category == ERROR) {
         return NULL;
     }
-    if (mem_category == LARGE) {
-        unsigned int pages_used = *(unsigned int*)(ptr - sizeof(unsigned int));
-        size_t new_size = size + sizeof(mem_region_t) + sizeof(unsigned int);
-        new_size = (new_size + (getpagesize() - 1)) & ~(getpagesize() - 1);
-        if (new_size / getpagesize() == pages_used) {
-            return ptr;
-        }
-    }
-    if ((mem_category == TINY && size <= TINY_MEM_SIZE) ||
-        (mem_category == SMALL && size > TINY_MEM_SIZE && size <= SMALL_MEM_SIZE)) {
+
+    if (need_realloc(ptr, size, mem_category) == false) {
         return ptr;
     }
 

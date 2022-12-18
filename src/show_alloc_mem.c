@@ -25,7 +25,7 @@ static size_t list_allocs(mem_region_t* list, size_t heap_size, size_t mem_size)
         char* mem_block = current->allocations;
         while ((void*)mem_block < (void*)current + heap_size) {
             if (*mem_block != FREE) {
-//                write_ptr(mem_block + 1, mem_size);
+                write_ptr(mem_block + 1, mem_size);
                 ret += mem_size;
             }
             mem_block += mem_size + 1;
