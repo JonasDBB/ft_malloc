@@ -37,7 +37,10 @@ INCS = $(addprefix $(INCDIR), $(_INCS))
 SRCS = $(addprefix $(SRCDIR), $(_SRCS))
 OBJS = $(_OBJS:.c=.o)
 
-all: $(NAME)
+all: git-submodules $(NAME)
+
+git-submodules:
+	@git submodule update --init
 
 # this was made with cmake, so manually making it here
 CLIB_NAME := libft_clib.a
@@ -46,8 +49,9 @@ CLIB_SRCDIR := ft_clib/
 CLIB_C := ft_clib.c
 CLIB_O := $(CLIB_C:.c=.o)
 $(OBJDIR)$(CLIB_NAME):
+	@echo "creating clib"
 	@mkdir -p $(OBJDIR)
-	cd $(OBJDIR) && \
+	@cd $(OBJDIR) && \
 	$(CC) $(CFLAGS) -c ../$(CLIB_DIR)$(CLIB_SRCDIR)$(CLIB_C) && \
 	ar rcs $(CLIB_NAME) $(CLIB_O)
 
