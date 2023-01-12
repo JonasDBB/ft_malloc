@@ -39,28 +39,24 @@ OBJS = $(_OBJS:.c=.o)
 
 all: $(NAME)
 
-check-and-reinit-submodules:
-	@git config --global --add safe.directory '*'
-	@if git submodule status | egrep -q '^[-]|^[+]' ; then \
-			git submodule update --init; \
-	fi
+# this was made with cmake, so manually making it here
 CLIB_NAME := libft_clib.a
 CLIB_DIR := ft_clib/
 CLIB_SRCDIR := ft_clib/
-CLIB_BUILDDIR := build/
-CLIB := $(CLIB_DIR)$(CLIB_BUILDDIR)$(CLIB_NAME)
-$(CLIB): check-and-reinit-submodules
-	@cd $(CLIB_DIR) && \
-	mkdir -p $(CLIB_BUILDDIR) && \
-	cmake -B $(CLIB_BUILDDIR) -S . && \
-	cmake --build $(CLIB_BUILDDIR) --target ft_clib
+CLIB_C := ft_clib.c
+CLIB_O := $(CLIB_C:.c=.o)
+$(OBJDIR)$(CLIB_NAME):
+	@mkdir -p $(OBJDIR)
+	cd $(OBJDIR) && \
+	$(CC) $(CFLAGS) -c ../$(CLIB_DIR)$(CLIB_SRCDIR)$(CLIB_C) && \
+	ar rcs $(CLIB_NAME) $(CLIB_O)
 
-$(OBJDIR)%.o: $(SRCDIR)%.c $(CLIB)
+$(OBJDIR)%.o: $(SRCDIR)%.c $(OBJDIR)$(CLIB_NAME)
 	@mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $@ -I$(INCDIR) -I$(CLIB_DIR)$(CLIB_SRCDIR)
 
 $(NAME): $(OBJS) $(INCS)
-	$(CC) $(CFLAGS) $(OBJS) $(CLIB) -shared -o $(NAME)
+	$(CC) $(CFLAGS) $(OBJS) $(OBJDIR)$(CLIB_NAME) -shared -o $(NAME)
 	ln -sf $(NAME) $(LINKNAME)
 
 clean:
@@ -69,6 +65,5 @@ clean:
 fclean: clean
 	@rm -f $(NAME)
 	@rm -f $(LINKNAME)
-	@rm -rf $(CLIB_DIR)$(CLIB_BUILDDIR)
 
 re: fclean all
