@@ -8,6 +8,25 @@
 extern pthread_mutex_t g_lock;
 extern heaps_t g_heaps;
 
+bool is_allocated_ptr(void* ptr, mem_region_t* region, mem_size mem_size) {
+    if (mem_size == TINY || mem_size == SMALL) {
+        char* mem_block = region->allocations;
+        unsigned long heap_size = mem_size == TINY ? TINY_HEAP_SIZE : SMALL_HEAP_SIZE;
+        unsigned long block_size = mem_size == TINY ? TINY_MEM_SIZE : SMALL_MEM_SIZE;
+        while ((void*)mem_block < (void*)region + heap_size) {
+            if (mem_block + 1 == ptr) {
+                return true;
+            }
+            mem_block += block_size + 1;
+        }
+    } else if (mem_size == LARGE) {
+        if (ptr == region->allocations + sizeof(unsigned int)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static mem_region_t* find_owning_heap(void* ptr, mem_size* mem_size) {
     mem_region_t* current = g_heaps.tiny;
     while (current != NULL) {
@@ -68,6 +87,9 @@ void locked_free(void* ptr) {
     if (owning_heap == NULL) {
         // pointer being freed was not allocated
         errno = EINVAL;
+        return;
+    }
+    if (!is_allocated_ptr(ptr, owning_heap, owning_size)) {
         return;
     }
     if (owning_size == TINY || owning_size == SMALL) {

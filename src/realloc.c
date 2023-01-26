@@ -11,21 +11,30 @@ static mem_size find_allocated_size(void* ptr) {
     mem_region_t* current = g_heaps.tiny;
     while (current != NULL) {
         if (ptr > current->allocations && ptr < current->allocations + TINY_HEAP_SIZE) {
-            return TINY;
+            if (is_allocated_ptr(ptr, current, TINY)) {
+                return TINY;
+            }
+            return ERROR;
         }
         current = current->next;
     }
     current = g_heaps.small;
     while (current != NULL) {
         if (ptr > current->allocations && ptr < current->allocations + SMALL_HEAP_SIZE) {
-            return SMALL;
+            if (is_allocated_ptr(ptr, current, SMALL)) {
+                return SMALL;
+            }
+            return ERROR;
         }
         current = current->next;
     }
     current = g_heaps.large;
     while (current != NULL) {
         if (ptr == current->allocations + sizeof(unsigned int)) {
-            return LARGE;
+            if (is_allocated_ptr(ptr, current, LARGE)) {
+                return LARGE;
+            }
+            return ERROR;
         }
         current = current->next;
     }

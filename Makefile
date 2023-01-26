@@ -99,7 +99,7 @@ test4: all
 
 test5: all
 	gcc -o test5 tests/test5.c
-	./run.sh /usr/bin/time -l ./test5
+	./run.sh ./test5
 	rm test5
 
 test6: all
