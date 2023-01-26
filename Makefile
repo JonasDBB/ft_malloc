@@ -29,7 +29,8 @@ _INCS = \
 _SRCS = \
 	malloc.c \
 	free.c \
-	realloc.c
+	realloc.c \
+	show_alloc_mem.c
 
 _OBJS = $(addprefix $(OBJDIR), $(_SRCS))
 
@@ -103,6 +104,6 @@ test5: all
 	rm test5
 
 test6: all
-	gcc -o test6 tests/test6.c
-	./run.sh /usr/bin/time -l ./test6
+	gcc -o test6 tests/test6.c $(LINKNAME) -I $(INCDIR) -I $(CLIB_DIR)$(CLIB_SRCDIR)
+	./run.sh ./test6
 	rm test6

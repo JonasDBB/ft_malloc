@@ -55,7 +55,7 @@ static void append_heap(mem_region_t* new_heap, mem_region_t** list) {
 
 void* malloc_tiny_small(mem_region_t** list, size_t heap_size, size_t mem_size) {
     void* ret = find_free_mem(*list, heap_size, mem_size);
-    while (ret == NULL) {
+    if (ret == NULL) {
         append_heap(create_region(heap_size), list);
         ret = find_free_mem(*list, heap_size, mem_size);
     }
