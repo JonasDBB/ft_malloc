@@ -55,7 +55,7 @@ $(OBJDIR)$(CLIB_NAME):
 	$(CC) $(CFLAGS) -c ../$(CLIB_DIR)$(CLIB_SRCDIR)$(CLIB_C) && \
 	ar rcs $(CLIB_NAME) $(CLIB_O)
 
-$(OBJDIR)%.o: $(SRCDIR)%.c $(OBJDIR)$(CLIB_NAME)
+$(OBJDIR)%.o: $(SRCDIR)%.c $(OBJDIR)$(CLIB_NAME) $(INCDIR)*.h
 	@mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) -c -fPIC $< -o $@ -I$(INCDIR) -I$(CLIB_DIR)$(CLIB_SRCDIR)
 
@@ -71,3 +71,38 @@ fclean: clean
 	@rm -f $(LINKNAME)
 
 re: fclean all
+
+test0: all
+	gcc -o test0 tests/test0.c
+	./run.sh /usr/bin/time -l ./test0
+	rm test0
+
+test1: all
+	gcc -o test1 tests/test1.c
+	./run.sh /usr/bin/time -l ./test1
+	rm test1
+
+test2: all
+	gcc -o test2 tests/test2.c
+	./run.sh /usr/bin/time -l ./test2
+	rm test2
+
+test3: all
+	gcc -o test3 tests/test3.c
+	./run.sh /usr/bin/time -l ./test3
+	rm test3
+
+test4: all
+	gcc -o test4 tests/test4.c
+	./run.sh /usr/bin/time -l ./test4
+	rm test4
+
+test5: all
+	gcc -o test5 tests/test5.c
+	./run.sh /usr/bin/time -l ./test5
+	rm test5
+
+test6: all
+	gcc -o test6 tests/test6.c
+	./run.sh /usr/bin/time -l ./test6
+	rm test6
